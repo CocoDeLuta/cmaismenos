@@ -1,0 +1,23 @@
+nascoxas teste
+tipoisso
+poucacoisa a = -a;
+a = 2 * 1;
+acontece (b == c)
+tipoisso
+  b = b - 1;
+euacho
+vainafe(poucacoisa a = 0; a<b; a++)
+tipoisso
+a += b;
+euacho
+euacho
+
+
+
+nascoxas teste
+tipoisso
+vainafe(a; a<b; a++)
+tipoisso
+a += b;
+euacho
+euacho
