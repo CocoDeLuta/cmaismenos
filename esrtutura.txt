@@ -1,0 +1,93 @@
+<MAIN> ::= <INICIOPROGRAMA> <ID> <ABREBLOCO> <FECHABLOCO>
+<SEPA> ::= "sepa" <ABREPAR> <EXPRESSAO> <FECHAPAR> <ABREBLOCO> <COMANDOS> <FECHABLOCO>
+<ACONTECE> ::= "acontece" <ABREPAR> <EXPRESSAO> <FECHAPAR> <ABREBLOCO> <COMANDOS> <FECHABLOCO>
+<VAINAFE> ::= "vainafe" <ABREPAR> (<ATRIBUICAO> | <DECLARAVALOR> ) <EXPRESSAO> <PONTOVIRGULA> <INCREMENTO> <FECHAPAR> <ABREBLOCO> <COMANDOS> <FECHABLOCO>
+
+-----------------------------------------------------
+<INICIOPROGRAMA> ::= "nascoxas"
+<ID> ::= <LETRA>(<LETRA> | <DIGITO>)*
+<LETRA> ::= ["A"-"Z"] | ["a"-"z"]
+<DIGITO> ::= ["0"-"9"]
+<OPERADOR> ::= "+" | "-" | "*" | "/" | "==" | "!=" | "<" | ">" | "<=" | ">="
+<EXPRESSAO> ::= <ID> | <DIGITO> | <ID> <OPERADOR> <ID> | <ID> <OPERADOR> <DIGITO> | <DIGITO> <OPERADOR> <DIGITO>
+<INCREMENTO> ::= <ID> "++" | <ID> "--" | <ID> "+=" <EXPRESSAO> | <ID> "-=" <EXPRESSAO>
+
+<PONTOVIRGULA> ::= ";"
+<ABREBLOCO> ::= "tipoisso"
+<FECHABLOCO> ::="euacho"
+<ABREPAR> ::= "("
+<FECHAPAR> ::= ")"
+
+<TIPOVARIAVEL> ::= <TIPOBOOL> | <TIPOFLOAT> | <TIPOINTEIRO>
+<TIPOINTEIRO> ::= "poucacoisa"
+<TIPOFLOAT> ::= "falouedisse"
+<TIPOBOOL> ::= "maisoumenos" 
+
+<DECLARACAO> ::= <TIPOVARIAVEL> ((<ID> <PONTOVIRGULA>) | (<ATRIBUICAO>))
+<DECLARAVALOR> ::= <TIPOVARIAVEL> <ATRIBUICAO>
+<ATRIBUICAO> ::= <ID> "=" <EXPRESSAO> <PONTOVIRGULA>
+
+<COMANDOS> ::= (<DECLARACAO> | <DECLARAVALOR> | <ATRIBUICAO> | <CONDICIONAL> | <WHILE> | <FOR>)*
+----------------------------------------------------
+exemplo de codigo:
+
+nascoxas main tipoisso
+    poucacoisa a;
+    falouedisse b;
+    maisoumenos c;
+
+    sepa(c==true)
+    tipoisso
+        //codigo
+    euacho
+
+    vainafe(int i =0; i < a; i+)
+    tipoisso
+        //codigo
+    euacho
+
+    acontece(a<10)
+    tipoisso
+        //codigo
+    euacho
+euacho
+
+nascoxas meuPrograma
+tipoisso
+
+poucacoisa x;
+falouedisse y;
+maisoumenos z;
+
+poucacoisa a = 10;
+falouedisse b = 5;
+maisoumenos cond = maisoumenos; // true
+
+
+x = 20;
+y = 7;
+z = maisoumenos;
+
+
+a = x + 5;
+b = y * 2;
+cond = maisoumenos;
+
+
+sepa ( a > 5 )
+tipoisso
+  x = a + 1;
+euacho
+
+acontece ( a <= 5 )
+tipoisso
+  x = a - 1;
+euacho
+
+
+vainafe ( poucacoisa i = 0; i < 10; i++ )
+tipoisso
+  x = x + i;
+euacho
+
+euacho

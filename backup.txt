@@ -1,0 +1,214 @@
+// ANTES DE COMECAR O 2 BIMESTRE
+options
+{
+  static = true;
+}
+
+PARSER_BEGIN(CMaisMenos)
+package compilador;
+
+public class CMaisMenos
+{
+  public static void main(String args []) throws ParseException
+  {
+    CMaisMenos parser = new CMaisMenos(System.in);
+    while (true)
+    {
+      System.out.println("Escreve alguma coisa ai");
+      System.out.print("Escreve tipo: nascoxas algo tipoassim maisoumenos isso euacho");
+      try
+      {
+        switch (CMaisMenos.main())
+        {
+          case 0 : 
+          System.out.println("Pode ser.");
+          break;
+          case 1 : 
+          System.out.println("Vai pela sombra.");
+          break;
+          default : 
+          break;
+        }
+      }
+      catch (Exception e)
+      {
+        System.out.println("Acho que não.");
+        System.out.println(e.getMessage());
+        CMaisMenos.ReInit(System.in);
+      }
+      catch (Error e)
+      {
+        System.out.println("PUTZ.");
+        System.out.println(e.getMessage());
+        break;
+      }
+    }
+  }
+}
+
+PARSER_END(CMaisMenos)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+}
+
+TOKEN : 
+{
+    < INICIOPROGRAMA : "nascoxas" >
+  | < PONTOVIRGULA : ";" >
+  | < VIRGULA : "," >
+  | < ABREBLOCO : "tipoisso" >
+  | < FECHABLOCO : "euacho" >
+  | < ABREPAR : "(" >
+  | < FECHAPAR : ")" >
+  | < TIPOINTEIRO : "poucacoisa" >
+  | < TIPOFLOAT : "falouedisse" >
+  | < TIPOBOOL : "maisoumenos" >
+  | < SEPA : "sepa" >
+  | < ACONTECE : "acontece" >
+  | < VAINAFE : "vainafe" >
+
+  | < DECIMAL : ( < DIGITO >)+  >
+  | < #DIGITO : [ "0"-"9" ] >
+
+  | < ID : < LETRA > (< LETRA > | < DIGITO >)* >
+  | < #LETRA : [ "A"-"Z" ] | [ "a"-"z" ] >
+
+  // Operadores lógicos
+  | < IGUAL_LOG   : "==" | "== " | " ==" | " == " > // TODAS AS VARIACOES DE ESPACOS
+  | < DIFERENTE   : "!=" | "!= " | " !=" | " != " >
+  | < MENOR_IGUAL : "<=" | "<= " | " <=" | " <= " >
+  | < MAIOR_IGUAL : ">=" | ">= " | " >=" | " >= " >
+  | < MENOR 	  : "<" | "< " | " <" | " < " >
+  | < MAIOR 	  : ">" | "> " | " >" | " > " > 
+
+
+  // Operadores de incremento e atribuição composta
+  | < INCREMENTO  : "++" | "++ " | " ++" | " ++ " >
+  | < DECREMENTO  : "--" | "-- " | " --" | " -- " >
+  | < MAIS_IGUAL  : "+=" | "+= " | " +=" | " += " >
+  | < MENOS_IGUAL : "-=" | "-= " | " -=" | " -= " >
+
+  // Operadores matemáticos (deixe por último para evitar conflito)
+  | < MAIS    : "+" | "+ " | " +" | " + " >
+  | < MENOS   : "-" | "- " | " -" | " - " >
+  | < MULTI   : "*" | "* " | " *" | " * " >
+  | < DIVISAO : "/" | "/ " | " /" | " / " >
+}
+
+int main() :
+{}
+{
+  <INICIOPROGRAMA> <ID>
+  <ABREBLOCO>
+    comandos()
+  <FECHABLOCO>
+  
+  { return 0; }
+}
+
+void comandos() :
+{}
+{
+  (
+     declaraVariavel()
+   | LOOKAHEAD(2) atribuiValorComposto()
+   | atribuiValor()
+   | sepa()
+   | acontece()
+   | vainafe()
+  )*
+}
+
+void declaraVariavel() : {}
+{
+  tipoVariavel() < ID > ( "=" expressao() )? ( "," < ID > ( "=" expressao() )? )* <PONTOVIRGULA>
+}
+
+void declaraVariavelFor() : {}
+{
+  tipoVariavel() < ID > ( "=" expressao() )? 
+}
+
+void tipoVariavel() : {}
+{
+  <TIPOINTEIRO> | <TIPOFLOAT> | <TIPOBOOL>
+}
+
+void operador_matematico(): {}
+{
+    < MAIS>
+  | < MENOS>
+  | < MULTI>
+  | < DIVISAO>
+}
+
+void operador_logico(): {}
+{
+    < IGUAL_LOG >
+  | < DIFERENTE>
+  | < MENOR_IGUAL>
+  | < MAIOR_IGUAL>
+  | < MENOR>
+  | < MAIOR> 
+}
+
+void expressao() :
+{}
+{
+  (< MENOS >)? termo() ( operador_matematico() termo() )*
+}
+
+void expressaoLogica() :
+{}
+{
+  termo() operador_logico() termo()
+}
+
+void termo() :
+{}
+{
+   <ID>
+  | <DECIMAL>
+}
+
+void atribuiValor() :
+{}
+{
+  <ID> "=" expressao() <PONTOVIRGULA>
+}
+
+void atribuiValorComposto() :
+{}
+{
+  <ID> ( <MAIS_IGUAL> | <MENOS_IGUAL> ) expressao() <PONTOVIRGULA>
+}
+
+void sepa() :
+{}
+{
+  <SEPA> <ABREPAR> expressaoLogica() <FECHAPAR> <ABREBLOCO> comandos() <FECHABLOCO>
+}
+
+void acontece() :
+{}
+{
+  <ACONTECE> <ABREPAR> expressaoLogica() <FECHAPAR> <ABREBLOCO> comandos() <FECHABLOCO>
+}
+
+void vainafe() :
+{}
+{
+  <VAINAFE> <ABREPAR> declaraVariavelFor() <PONTOVIRGULA> expressaoLogica() <PONTOVIRGULA> incremento() < PONTOVIRGULA >
+  <FECHAPAR> <ABREBLOCO> comandos() <FECHABLOCO>
+}
+
+void incremento() :
+{}
+{
+  <ID> ( <INCREMENTO> | <DECREMENTO> | <MAIS_IGUAL> expressao() | <MENOS_IGUAL> expressao() ) 
+}

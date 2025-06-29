@@ -1,0 +1,549 @@
+options
+{
+  static = true;
+}
+
+PARSER_BEGIN(CMaisMenos)
+package compilador;
+import recovery.*;
+
+public class CMaisMenos
+{
+  public static void main(String args []) throws ParseException
+  {
+    CMaisMenos parser = new CMaisMenos(System.in);
+    while (true)
+    {
+      System.out.println("Escreve alguma coisa ai");
+      System.out.print("Escreve tipo: nascoxas algo tipoassim maisoumenos isso euacho");
+      System.out.println(" ");
+
+	  SimpleNode node = CMaisMenos.main();
+      System.out.println("A arvore do programa ficou assim:");
+      node.dump(" -> ");
+      try
+      {
+          System.out.println(" ");
+          System.out.println("Pode ser.");
+        /*switch (CMaisMenos.main())
+        {
+          case 0 : 
+          break;
+          case 1 : 
+          System.out.println("Vai pela sombra.");
+          break;
+          default : 
+          break;
+        }*/
+      }
+      catch (Exception e)
+      {
+        System.out.println(" ");
+        System.out.println("Acho que não.");
+        System.out.println(e.getMessage());
+        CMaisMenos.ReInit(System.in);
+      }
+      catch (Error e)
+      {
+        System.out.println("PUTZ.");
+        System.out.println(e.getMessage());
+        break;
+      }
+    }
+  }
+
+	static public String im(int x)
+  {
+    int k;
+	String s;
+    s = tokenImage[x];
+    k = s.lastIndexOf("\"");
+    try {
+      s = s.substring(1,k);
+    }
+   catch (StringIndexOutOfBoundsException e)
+	   {}
+   return s;
+  }
+	
+  static public  Token lastError = null;
+  static public  Token firstErrorToken = null;
+  static boolean eof ;    // variável que indica se EOF foi alcançado
+	
+  // o método abaixo consome tokens até alcançar um que pertença ao conjunto
+  // de sincronização
+  static void consumeUntil(RecoverySet g,
+	                 ParseException e,
+	                 String met) throws ParseEOFException,
+	                                    ParseException
+  {
+	Token tok;
+	System.out.println();
+	System.out.println("*** " + met + " ***");
+	System.out.println("     Conjunto de sincronização: " + g);
+		
+	if (g == null) throw e; // se o conjunto é null, propaga a exceção
+	
+	tok = getToken(1); // pega token corrente
+	if (firstErrorToken == null) {
+        firstErrorToken = tok; // armazena o primeiro token do erro
+    }
+	while ( ! eof )	{ // se não chegou ao fim do arquivo
+	  if ( g.contains(tok.kind)) {//achou um token no conjunto
+	    System.out.println("     Encontrado token de sincronização: " + 
+	                       im(tok.kind));
+	    break;
+	  }
+	  System.out.println("     Ignorando o token: " + im(tok.kind));
+	  getNextToken();     // pega próximo token       
+      tok = getToken(1);
+	  if (tok.kind == EOF && ! g.contains(EOF) ) // fim da entrada?   
+	      eof = true;
+	}
+    if ( tok != lastError)  {
+	  System.out.println(e.getMessage());
+	  lastError = tok;
+	   
+	}
+	if ( eof )
+	  throw new ParseEOFException("Encontrei EOF onde não deveria.");
+  }
+
+  
+}
+
+PARSER_END(CMaisMenos)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+}
+
+TOKEN : 
+{
+  // tokens gerais
+    < INICIOPROGRAMA : "nascoxas" >
+  | < PONTOVIRGULA : ";" >
+  | < VIRGULA : "," >
+  | < ABREBLOCO : "tipoisso" >
+  | < FECHABLOCO : "euacho" >
+  | < ABREPAR : "(" >
+  | < FECHAPAR : ")" >
+  | < TIPOINTEIRO : "poucacoisa" >
+  | < TIPOFLOAT : "falouedisse" >
+  | < TIPOBOOL : "maisoumenos" >
+  | < SEPA : "sepa" >
+  | < ACONTECE : "acontece" >
+  | < VAINAFE : "vainafe" >
+
+  | < DECIMAL : ( < DIGITO >)+  >
+  | < #DIGITO : [ "0"-"9" ] >
+
+  | < ID : < LETRA > (< LETRA > | < DIGITO >)* >
+  | < #LETRA : [ "A"-"Z" ] | [ "a"-"z" ] >
+
+  // Operadores lógicos
+  | < IGUAL_LOG   : "==" | "== " | " ==" | " == " > // TODAS AS VARIACOES DE ESPACOS
+  | < DIFERENTE   : "!=" | "!= " | " !=" | " != " >
+  | < MENOR_IGUAL : "<=" | "<= " | " <=" | " <= " >
+  | < MAIOR_IGUAL : ">=" | ">= " | " >=" | " >= " >
+  | < MENOR 	  : "<"  | "< "  | " <"  | " < " >
+  | < MAIOR 	  : ">"  | "> "  | " >"  | " > " > 
+
+
+  // Operadores de incremento e atribuição composta
+  | < INCREMENTO  : "++" | "++ " | " ++" | " ++ " >
+  | < DECREMENTO  : "--" | "-- " | " --" | " -- " >
+  | < MAIS_IGUAL  : "+=" | "+= " | " +=" | " += " >
+  | < MENOS_IGUAL : "-=" | "-= " | " -=" | " -= " >
+
+  // Operadores matemáticos (deixe por último para evitar conflito)
+  | < MAIS    : "+" | "+ " | " +" | " + " >
+  | < MENOS   : "-" | "- " | " -" | " - " >
+  | < MULTI   : "*" | "* " | " *" | " * " >
+  | < DIVISAO : "/" | "/ " | " /" | " / " >
+  | < IGUAL   : "=" | "= " | " =" | " = " >
+}
+
+SimpleNode main() :
+{RecoverySet sinc = Follow.main;}
+{
+  try 
+  {
+	  NasCoxas() //INICIOPROGRAMA
+	  Id() //ID
+	  TipoIsso() //ABREBLOCO
+	  Comandos()
+	  EuAcho() //FECHABLOCO
+
+	  { return jjtThis; } 
+  } 
+  catch (ParseException e) 
+  {
+    consumeUntil(sinc, e, "Main");
+    return null;
+  }
+
+}
+
+void Comandos() :
+{RecoverySet sinc = Follow.comandos;}
+{
+  try
+  {
+	  (   DeclaraVariavel()
+	   	| AtribuiValor()
+	   	| If()
+	   	| While()
+	   	| For()
+	  )*
+  }
+  catch (ParseException e)
+  {
+    consumeUntil(sinc, e, "Comandos");
+  }
+}
+
+void DeclaraVariavel() :
+{RecoverySet sinc = Follow.declaraVariavel;}
+{
+  try
+  {  
+	 TipoVariavel() 
+	 Id() ( Igual() Expressao() )? ( Virgula() Id() ( Igual() Expressao() )? )* PontoVirgula()
+  }
+  catch( ParseException e)
+  {
+    consumeUntil(sinc, e, "Declaração de variável");
+  }
+}
+
+void DeclaraVariavelFor() : 
+{RecoverySet sinc = Follow.declaraVariavelFor;}
+{
+  try
+  {
+	 TipoVariavel() 
+	 Id() ( Igual() Expressao() )? 
+  }
+  catch( ParseException e)
+  {
+    consumeUntil(sinc, e, "Declaração de variável para for");
+  }
+}
+
+void TipoVariavel() : 
+{RecoverySet sinc = Follow.tipoVariavel;}
+{
+  try
+  {
+      PoucaCoisa() // TIPOINTEIRO
+    | FaloueDisse() // TIPOFLOAT
+    | MaisOuMenos() // TIPOBOOL
+  }
+  catch( ParseException e)
+  {
+    consumeUntil(sinc, e, "Tipo de variável");
+  }
+}
+
+void OperadorMatematico(): 
+{RecoverySet sinc = Follow.operadorMatematico;}
+{
+  try
+  {
+      Mais()
+    | Menos()
+    | Multiplicado()
+    | Dividido()
+  }
+  catch (ParseException e)
+  {
+    consumeUntil(sinc, e, "Operador matemático");
+  }
+}
+
+void OperadorLogico(): 
+{RecoverySet sinc = Follow.operadorLogico;}
+{
+  try
+  {
+      IgualIgual()
+    | Diferente()
+    | MenorIgual()
+    | MaiorIgual()
+    | Menor()
+    | Maior()
+  }
+  catch (ParseException e)
+  {
+    consumeUntil(sinc, e, "Operador lógico");
+  }
+}
+
+void Expressao() :
+{RecoverySet sinc = Follow.expressao;}
+{
+  try
+  {
+    Termo() ( OperadorMatematico() Termo() )*
+  }
+  catch (ParseException e)
+  {
+    consumeUntil(sinc, e, "Expressão matemática");
+  }
+}
+
+void ExpressaoLogica() :
+{RecoverySet sinc = Follow.expressaoLogica;}
+{
+  try
+  {
+    Expressao() OperadorLogico() Expressao()
+  }
+  catch (ParseException e)
+  {
+    consumeUntil(sinc, e, "Expressão lógica");
+  }
+}
+
+
+void Termo() :
+{RecoverySet sinc = Follow.termo;}
+{
+  try
+  {
+      AbrePar() Expressao() FechaPar()
+    | Menos() Termo()
+    | Id()
+    | Numero()
+  }
+  catch (ParseException e)
+  {
+    consumeUntil(sinc, e, "Termo");
+  }
+}
+
+
+void AtribuiValor() :
+{RecoverySet sinc = Follow.atribuiValor;}
+{
+  try
+  {
+    Id() ( Igual() | MaisIgual() | MenosIgual() ) Expressao() PontoVirgula()
+  }
+  catch (ParseException e)
+  {
+    consumeUntil(sinc, e, "Atribuição de valor");
+  }
+}
+
+void If() : // sepa(a<b){ comandos }
+{RecoverySet sinc = Follow.sepaIf;}
+{
+  try
+  { 
+    Sepa() AbrePar() ExpressaoLogica() FechaPar() TipoIsso() Comandos() EuAcho()
+  }
+  catch (ParseException e)
+  {
+    consumeUntil(sinc, e, "Sepa");
+  }
+}
+
+void While() : 
+{RecoverySet sinc = Follow.aconteceWhile;}
+{
+  try
+  {
+    Acontece() AbrePar() ExpressaoLogica() FechaPar() TipoIsso() Comandos() EuAcho()
+  }
+  catch (ParseException e)
+  {
+    consumeUntil(sinc, e, "Acontece");
+  }
+}
+
+void For() : 
+{RecoverySet sinc = Follow.vainafeFor;}
+{
+  try
+  {
+    Vainafe() AbrePar() (DeclaraVariavelFor() | Id()) PontoVirgula() ExpressaoLogica() PontoVirgula()
+    IncrementoOuDecremento() FechaPar() TipoIsso() Comandos() EuAcho()
+  }
+  catch (ParseException e)
+  {
+    consumeUntil(sinc, e, "Vainafe");
+  }
+}
+
+void IncrementoOuDecremento() :
+{RecoverySet sinc = Follow.incDec;}
+{
+  try
+  {
+    Id() ( MaisMais() | MenosMenos() | MaisIgual() Expressao() | MenosIgual() Expressao() )
+  }
+  catch (ParseException e)
+  {
+    consumeUntil(sinc, e, "Incremento ou Decremento");
+  }
+}
+ 
+// SEM FOLLOW A PARTIR DAQUI
+// METODO PRA CADA TOKEN PRA ARVORE
+// NÃO É A MANEIRA CORRETA E MAIS EFICIENTE MAS PARA FINS DE VISUALIZAÇÃO SERVE
+
+void NasCoxas() : {}
+{
+  < INICIOPROGRAMA >
+}
+
+void PontoVirgula() : {}
+{
+  < PONTOVIRGULA >
+}
+
+void Virgula() : {}
+{
+  < VIRGULA >
+}
+
+void TipoIsso() : {}
+{
+  < ABREBLOCO >
+}
+
+void EuAcho() : {}
+{
+  < FECHABLOCO >
+}
+
+void AbrePar() : {}
+{
+	< ABREPAR >
+}
+
+void FechaPar() : {}
+{
+	< FECHAPAR >
+}
+
+void Igual() : {}
+{
+	< IGUAL >
+}
+
+void Sepa() : {}
+{
+	< SEPA >
+}
+
+void Acontece() : {}
+{
+	< ACONTECE >
+}
+
+void Vainafe() : {}
+{
+	< VAINAFE >
+}
+
+void Id() : {}
+{
+  < ID >
+}
+
+void Menos() : {}
+{
+  < MENOS >
+}
+
+void PoucaCoisa() : {}
+{
+  < TIPOINTEIRO >
+}
+
+void FaloueDisse() : {}
+{
+  < TIPOFLOAT >
+}
+
+void MaisOuMenos() : {}
+{
+  < TIPOBOOL >
+}
+
+void Mais() : {}
+{
+  < MAIS >
+}
+
+void Multiplicado() : {}
+{
+  < MULTI >
+}
+
+void Dividido() : {}
+{
+  < DIVISAO >
+}
+
+void Numero() : {}
+{
+  < DECIMAL >
+}
+
+void IgualIgual() : {}
+{
+  < IGUAL_LOG >
+}
+
+void Diferente() : {}
+{
+  < DIFERENTE >
+}
+
+void MenorIgual() : {}
+{
+  < MENOR_IGUAL >
+}
+
+void MaiorIgual() : {}
+{
+  < MAIOR_IGUAL >
+}
+
+void Menor() : {}
+{
+  < MENOR >
+}
+
+void Maior() : {}
+{
+  < MAIOR >
+}
+
+void MaisIgual() : {}
+{
+  < MAIS_IGUAL >
+}
+
+void MenosIgual() : {}
+{
+  < MENOS_IGUAL >
+}
+
+void MaisMais() : {}
+{
+  < INCREMENTO >
+}
+
+void MenosMenos() : {}
+{
+  < DECREMENTO >
+}
