@@ -72,7 +72,7 @@ public class CMaisMenos/*@bgen(jjtree)*/implements CMaisMenosTreeConstants/*@ege
 	
   static public  Token lastError = null;
   static public  Token firstErrorToken = null;
-  static boolean eof ;    // vari\u00e1vel que indica se EOF foi alcan\u00e7ado
+  static public boolean eof ;    // vari\u00e1vel que indica se EOF foi alcan\u00e7ado
 	
   // o m\u00e9todo abaixo consome tokens at\u00e9 alcan\u00e7ar um que perten\u00e7a ao conjunto
   // de sincroniza\u00e7\u00e3o
@@ -232,9 +232,9 @@ void Comandos() :
   {
 	  (   DeclaraVariavel()
 	   	| AtribuiValor()
-	   	| If()
-	   	| While()
-	   	| For()
+	   	| If() //sepa
+	   	| While() //acontece
+	   	| For() //vainafe
 	  )*
   }
   catch (ParseException e)

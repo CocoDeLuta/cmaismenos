@@ -35,7 +35,7 @@ public class Follow { //implementa os conjuntos first p/ alguns nao terminais
         declaraVariavel.add(new Integer(CMaisMenosConstants.SEPA));
         declaraVariavel.add(new Integer(CMaisMenosConstants.ACONTECE));
         declaraVariavel.add(new Integer(CMaisMenosConstants.VAINAFE));
-        declaraVariavel.add(new Integer(CMaisMenosConstants.FECHABLOCO));
+        
 
         // follow do declaraVariavelFor
         declaraVariavelFor.add(new Integer(CMaisMenosConstants.PONTOVIRGULA));
@@ -72,9 +72,7 @@ public class Follow { //implementa os conjuntos first p/ alguns nao terminais
         termo.add(new Integer(CMaisMenosConstants.MENOS));
         termo.add(new Integer(CMaisMenosConstants.MULTI));
         termo.add(new Integer(CMaisMenosConstants.DIVISAO));
-        termo.add(new Integer(CMaisMenosConstants.VIRGULA));
-        termo.add(new Integer(CMaisMenosConstants.PONTOVIRGULA));
-        termo.add(new Integer(CMaisMenosConstants.FECHAPAR));
+        
 
         // follow do atribuiValor
         atribuiValor.add(new Integer(CMaisMenosConstants.TIPOINTEIRO));
@@ -84,7 +82,7 @@ public class Follow { //implementa os conjuntos first p/ alguns nao terminais
         atribuiValor.add(new Integer(CMaisMenosConstants.SEPA));
         atribuiValor.add(new Integer(CMaisMenosConstants.ACONTECE));
         atribuiValor.add(new Integer(CMaisMenosConstants.VAINAFE));
-        atribuiValor.add(new Integer(CMaisMenosConstants.FECHABLOCO));
+        
         
         // follow do sepaIf
         sepaIf.add(new Integer(CMaisMenosConstants.TIPOINTEIRO));
@@ -94,7 +92,7 @@ public class Follow { //implementa os conjuntos first p/ alguns nao terminais
         sepaIf.add(new Integer(CMaisMenosConstants.SEPA));
         sepaIf.add(new Integer(CMaisMenosConstants.ACONTECE));
         sepaIf.add(new Integer(CMaisMenosConstants.VAINAFE));
-        sepaIf.add(new Integer(CMaisMenosConstants.FECHABLOCO));
+        
 
         // follow do aconteceWhile
         aconteceWhile.add(new Integer(CMaisMenosConstants.TIPOINTEIRO));
@@ -104,7 +102,7 @@ public class Follow { //implementa os conjuntos first p/ alguns nao terminais
         aconteceWhile.add(new Integer(CMaisMenosConstants.SEPA));
         aconteceWhile.add(new Integer(CMaisMenosConstants.ACONTECE));
         aconteceWhile.add(new Integer(CMaisMenosConstants.VAINAFE));
-        aconteceWhile.add(new Integer(CMaisMenosConstants.FECHABLOCO));
+        
         
         // follow do vainafeFor
         vainafeFor.add(new Integer(CMaisMenosConstants.TIPOINTEIRO));
@@ -114,7 +112,7 @@ public class Follow { //implementa os conjuntos first p/ alguns nao terminais
         vainafeFor.add(new Integer(CMaisMenosConstants.SEPA));
         vainafeFor.add(new Integer(CMaisMenosConstants.ACONTECE));
         vainafeFor.add(new Integer(CMaisMenosConstants.VAINAFE));
-        vainafeFor.add(new Integer(CMaisMenosConstants.FECHABLOCO));
+        
         
         // follow do incremento ou decremento
         incDec.add(new Integer(CMaisMenosConstants.FECHAPAR));

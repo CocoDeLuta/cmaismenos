@@ -21,3 +21,17 @@ tipoisso
 a += b;
 euacho
 euacho
+
+nascoxas nomedoprograma
+tipoisso
+
+salario = 3+1;
+
+euacho
+
+main
+{  
+
+
+
+}

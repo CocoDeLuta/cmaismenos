@@ -149,7 +149,7 @@ public class CompiladorGUI extends JFrame {
             System.setErr(ps);
 
             try {
-                compilador.CMaisMenos.setEof(false);
+                compilador.CMaisMenos.eof = false;
                 FileInputStream fis = new FileInputStream(arquivoAtual);
                 if (parser == null) {
                     parser = new compilador.CMaisMenos(fis);

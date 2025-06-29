@@ -63,7 +63,7 @@ public class CMaisMenos/*@bgen(jjtree)*/implements CMaisMenosTreeConstants, CMai
 
   static public  Token lastError = null;
   static public  Token firstErrorToken = null;
-  private static boolean eof ;    // variável que indica se EOF foi alcançado
+  static public boolean eof ;    // variável que indica se EOF foi alcançado
 
   // o método abaixo consome tokens até alcançar um que pertença ao conjunto
   // de sincronização
@@ -83,7 +83,7 @@ public class CMaisMenos/*@bgen(jjtree)*/implements CMaisMenosTreeConstants, CMai
         if (firstErrorToken == null) {
         firstErrorToken = tok; // armazena o primeiro token do erro
     }
-        while ( ! isEof() ) { // se não chegou ao fim do arquivo
+        while ( ! eof ) { // se não chegou ao fim do arquivo
           if ( g.contains(tok.kind)) {//achou um token no conjunto
             System.out.println("     Encontrado token de sincroniza\u00e7\u00e3o: " +
                                im(tok.kind));
@@ -93,14 +93,14 @@ public class CMaisMenos/*@bgen(jjtree)*/implements CMaisMenosTreeConstants, CMai
           getNextToken();     // pega próximo token       
       tok = getToken(1);
           if (tok.kind == EOF && ! g.contains(EOF) ) // fim da entrada?   
-              setEof(true);
+              eof = true;
         }
     if ( tok != lastError)  {
           System.out.println(e.getMessage());
           lastError = tok;
 
         }
-        if ( isEof() )
+        if ( eof )
           throw new ParseEOFException("Encontrei EOF onde n\u00e3o deveria.");
   }
 
@@ -1468,19 +1468,5 @@ if (jjtc000) {
   /** Disable tracing. */
   static final public void disable_tracing() {
   }
-
-/**
- * @return the eof
- */
-public static boolean isEof() {
-	return eof;
-}
-
-/**
- * @param eof the eof to set
- */
-public static void setEof(boolean eof) {
-	CMaisMenos.eof = eof;
-}
 
 }

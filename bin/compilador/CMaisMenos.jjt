@@ -68,7 +68,7 @@ public class CMaisMenos
 	
   static public  Token lastError = null;
   static public  Token firstErrorToken = null;
-  static boolean eof ;    // variável que indica se EOF foi alcançado
+  static public boolean eof ;    // variável que indica se EOF foi alcançado
 	
   // o método abaixo consome tokens até alcançar um que pertença ao conjunto
   // de sincronização
@@ -196,9 +196,9 @@ void Comandos() :
   {
 	  (   DeclaraVariavel()
 	   	| AtribuiValor()
-	   	| If()
-	   	| While()
-	   	| For()
+	   	| If() //sepa
+	   	| While() //acontece
+	   	| For() //vainafe
 	  )*
   }
   catch (ParseException e)
