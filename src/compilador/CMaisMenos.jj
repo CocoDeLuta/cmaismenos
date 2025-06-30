@@ -40,10 +40,15 @@ public class CMaisMenos/*@bgen(jjtree)*/implements CMaisMenosTreeConstants/*@ege
           break;
         }*/
       }
+      catch (recovery.ParseEOFException e)
+      {
+        System.out.println("Exceção EOF do parser hein: " + e.getMessage());
+        break;
+      }
       catch (Exception e)
       {
         System.out.println(" ");
-        System.out.println("Acho que n\u00e3o.");
+        System.out.println("Acho que não.");
         System.out.println(e.getMessage());
         CMaisMenos.ReInit(System.in);
       }

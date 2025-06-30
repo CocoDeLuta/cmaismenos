@@ -1,103 +1,110 @@
 package gui;
 
-import compilador.ParseException;
 import compilador.SimpleNode;
 import java.awt.*;
 import java.io.*;
 import javax.swing.*;
 
-// Janela principal da aplicação do compilador, com editor, saída e visualização da árvore sintática
-public class CompiladorGUI extends JFrame {
-    // Área de edição do código-fonte
-    private JTextArea editor;
-    // Área para exibir a numeração de linhas
-    private JTextArea lines;
-    // Área de saída para mensagens do console
-    private JTextArea output;
-    // Área de texto para exibir a árvore sintática textual
-    private JTextArea arvoreTextoArea;
-    // Arquivo atualmente aberto
-    private File arquivoAtual = null;
-    // Instância do parser
-    private compilador.CMaisMenos parser = null;
-    // Painel gráfico da árvore sintática
-    private ArvoreSintaticaPanel arvorePanel;
-    // Seletor para alternar visualização da árvore/tokens
-    private JComboBox<String> seletorArvore;
-    // ...
+// Janela principal da aplicação do compilador.
+// Responsável por montar a interface gráfica, integrar editor, saída, árvore sintática e tokens.
+public class CompiladorGUI extends JFrame 
+{
+    // Painel de saída para mensagens do console (erros, avisos, aceitação)
+    private OutputPanel outputPanel;
+    
+    // Painel de texto para exibir a árvore sintática em formato textual
+    private ArvoreTextoPanel arvoreTextoPanel;
 
-    // Inicializa a interface gráfica e os componentes
-    public CompiladorGUI() {
+    // Painel para exibir tokens reconhecidos e possíveis
+    private TokensPanel tokensPanel;
+
+    // Painel gráfico para desenhar a árvore sintática
+    private ArvoreSintaticaPanel arvorePanel;
+
+    // Arquivo atualmente aberto no editor
+    private File arquivoAtual = null;
+
+    // Instância do parser (analisador sintático)
+    private compilador.CMaisMenos parser = null;
+    
+    // ComboBox para alternar entre visualização gráfica, textual e tokens
+    private JComboBox<String> seletorArvore;
+    private EditorPanel editorPanel;
+
+    // Construtor: inicializa a interface gráfica e todos os painéis/componentes
+    public CompiladorGUI() 
+    {
         setTitle("Compilador - Editor e Visualizador de Árvore");
         setSize(800, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        // Cria área de edição
-        editor = new JTextArea();
-        // Cria área de numeração de linhas
-        lines = new JTextArea("1\n");
-        lines.setEditable(false);
-        lines.setBackground(new Color(230,230,230));
-        lines.setFont(editor.getFont());
-        lines.setMargin(new Insets(0, 8, 0, 8)); // margem interna para afastar os números
-        lines.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 2, Color.GRAY));
-        lines.setMinimumSize(new Dimension(40, 0));
-        lines.setPreferredSize(new Dimension(48, 0));
+        // Cria painel do editor de código (com destaque de sintaxe e numeração de linhas)
+        editorPanel = new EditorPanel();
 
-        editor.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { updateLines(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { updateLines(); }
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { updateLines(); }
-        });
-
-        JScrollPane scroll = new JScrollPane(editor);
-        scroll.setRowHeaderView(lines);
-
-        // Cria área de saída (console)
-        output = new JTextArea();
-        output.setEditable(false);
+        // Cria painel de saída (console de mensagens)
+        outputPanel = new OutputPanel();
 
         // Cria painel gráfico da árvore sintática
         arvorePanel = new ArvoreSintaticaPanel();
         arvorePanel.setPreferredSize(new Dimension(320, 0));
         arvorePanel.setBackground(Color.WHITE);
 
-        // Cria área de texto para árvore sintática textual
-        arvoreTextoArea = new JTextArea();
-        arvoreTextoArea.setEditable(false);
-        arvoreTextoArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        
 
+        // Cria painel de texto para árvore sintática textual
+        arvoreTextoPanel = new ArvoreTextoPanel();
 
+        // Cria painel de tokens
+        tokensPanel = new TokensPanel();
 
-        // Seletor para alternar visualização
-        seletorArvore = new JComboBox<>(new String[] {"Desenho", "Texto"});
+        // ComboBox para alternar visualização (gráfico, texto, tokens)
+        seletorArvore = new JComboBox<>(new String[] {"Desenho", "Texto", "Tokens"});
         seletorArvore.addActionListener(e -> alternarVisualizacaoArvore());
 
-        // Botão de compilação
+
+        // Botão para compilar o código
         JButton compileButton = new JButton("Compilar");
         compileButton.addActionListener(e -> compilar());
 
-        // Painel lateral direito para árvore sintática (com seletor)
+        // Botão para aumentar o tamanho da fonte do editor
+        JButton aumentarFonteButton = new JButton("A+");
+        aumentarFonteButton.setToolTipText("Aumentar fonte do editor");
+        aumentarFonteButton.addActionListener(e -> editorPanel.aumentarFonte());
+
+        // Botão para diminuir o tamanho da fonte do editor
+        JButton diminuirFonteButton = new JButton("A-");
+        diminuirFonteButton.setToolTipText("Diminuir fonte do editor");
+        diminuirFonteButton.addActionListener(e -> editorPanel.diminuirFonte());
+
+
+        // Painel lateral direito: contém árvore sintática (gráfico/texto) e tokens
         JPanel rightPanel = new JPanel(new BorderLayout());
         rightPanel.add(seletorArvore, BorderLayout.NORTH);
         JPanel cardPanel = new JPanel(new CardLayout());
         cardPanel.add(new JScrollPane(arvorePanel), "Desenho");
-        cardPanel.add(new JScrollPane(arvoreTextoArea), "Texto");
+        cardPanel.add(arvoreTextoPanel, "Texto");
+        cardPanel.add(tokensPanel, "Tokens");
         rightPanel.add(cardPanel, BorderLayout.CENTER);
 
-        // Split entre editor e console (output)
-        JSplitPane verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scroll, new JScrollPane(output));
+        // Split vertical: editor acima, console abaixo
+        JSplitPane verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, editorPanel, outputPanel);
         verticalSplit.setDividerLocation(300);
 
-        // Split principal: editor/console à esquerda, painel da árvore à direita
+        // Split horizontal: editor/console à esquerda, árvore/tokens à direita
         JSplitPane mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, verticalSplit, rightPanel);
         mainSplit.setDividerLocation(480);
 
-        add(mainSplit, BorderLayout.CENTER);
-        add(compileButton, BorderLayout.SOUTH);
 
-        // Menu
-        // Menu Arquivo (Novo, Abrir, Salvar)
+        // Painel de botões na parte inferior (compilar, aumentar/diminuir fonte)
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        bottomPanel.add(compileButton);
+        bottomPanel.add(aumentarFonteButton);
+        bottomPanel.add(diminuirFonteButton);
+
+        add(mainSplit, BorderLayout.CENTER);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // Menu superior: opções de arquivo (Novo, Abrir, Salvar)
         JMenuBar menuBar = new JMenuBar();
         JMenu menuArquivo = new JMenu("Arquivo");
         JMenuItem novoItem = new JMenuItem("Novo");
@@ -113,42 +120,36 @@ public class CompiladorGUI extends JFrame {
         menuArquivo.add(salvarItem);
         menuBar.add(menuArquivo);
         setJMenuBar(menuBar);
-
-
     }
-
-    // Atualiza a numeração de linhas do editor
-    private void updateLines() {
-        int linesCount = editor.getLineCount();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 1; i <= linesCount; i++) {
-            sb.append(i).append("\n");
-        }
-        lines.setText(sb.toString());
-    }
-
 
 
     // Compila o código-fonte, exibe árvore sintática, tokens e mensagens no console
-    private void compilar() {
-        output.setText("");
-        editor.getHighlighter().removeAllHighlights();
+    private void compilar() 
+    {
+        // Executa a compilação do código-fonte, atualiza árvore, tokens e saída
+        outputPanel.setOutputText("");
+        //editorPanel.getEditor().getHighlighter().removeAllHighlights();
+        //editorPanel.setErrorLine(0); // Removido destaque de erro
         arvorePanel.setRaiz(null);
-        arvoreTextoArea.setText("");
+        arvoreTextoPanel.setArvoreText("");
+        tokensPanel.setTokensText("");
 
-        if (arquivoAtual == null) {
+        if (arquivoAtual == null) 
+        {
             JOptionPane.showMessageDialog(this, "Nenhum arquivo aberto. Use Arquivo > Novo ou Abrir.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
         salvarArquivo();
-        try {
+        try 
+        {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream ps = new PrintStream(baos);
             PrintStream oldOut = System.out;
             System.setOut(ps);
             System.setErr(ps);
 
-            try {
+            try 
+            {
                 compilador.CMaisMenos.eof = false;
                 FileInputStream fis = new FileInputStream(arquivoAtual);
                 if (parser == null) {
@@ -158,6 +159,7 @@ public class CompiladorGUI extends JFrame {
                 }
                 compilador.CMaisMenos.firstErrorToken = null;
                 SimpleNode node = compilador.CMaisMenos.main();
+
                 // Exibe árvore textual capturando System.out
                 ByteArrayOutputStream arvoreOut = new ByteArrayOutputStream();
                 PrintStream arvorePs = new PrintStream(arvoreOut);
@@ -166,27 +168,56 @@ public class CompiladorGUI extends JFrame {
                 node.dump(" -> ");
                 arvorePs.flush();
                 System.setOut(oldSysOut);
-                arvoreTextoArea.setText(arvoreOut.toString());
+                arvoreTextoPanel.setArvoreText(arvoreOut.toString());
                 arvorePanel.setRaiz(node);
-                // Mensagem de aceitação
-                output.setText("Pode ser\n" + baos.toString());
+
+                // Exibe todos os tokens possíveis
+                StringBuilder tokensStr = new StringBuilder();
+                tokensStr.append("=== TOKENS POSSÍVEIS DA LINGUAGEM ===\n");
+                String[] tokenImage = compilador.CMaisMenosConstants.tokenImage;
+                for (int i = 0; i < tokenImage.length; i++) 
+                {
+                    String nome = compilador.CMaisMenos.im(i);
+                    tokensStr.append(String.format("[%d] %s\n", i, nome));
+                }
+                tokensStr.append("\n=== TOKENS IDENTIFICADOS NO CÓDIGO ===\n");
+
+                // Exibe tokens identificados no código
+                FileInputStream fisTokens = new FileInputStream(arquivoAtual);
+                compilador.CMaisMenos.ReInit(fisTokens);
+                compilador.Token t;
+                do 
+                {
+                    t = compilador.CMaisMenos.getNextToken();
+                    tokensStr.append("[").append(t.image).append("] ")
+                        .append("(tipo: ").append(compilador.CMaisMenos.im(t.kind)).append(")\n");
+                } while (t.kind != 0); // 0 = EOF
+                fisTokens.close();
+                tokensPanel.setTokensText(tokensStr.toString());
+
+                // Mensagem de aceitação ao final da saída
+                outputPanel.setOutputText(baos.toString() + "\nPode ser");
                 fis.close();
-            } catch (ParseException ex) {
-                output.setText("Acho que nao\n" + ex.getMessage() + "\n" + baos.toString());
+            }  
+            catch (Exception ex) 
+            {
+                // Mensagem de erro ao final da saída
+                outputPanel.setOutputText(baos.toString() + "\nAcho que nao\n" + ex.getMessage());
                 arvorePanel.setRaiz(null);
-                arvoreTextoArea.setText("");
-            } catch (Exception ex) {
-                output.setText("Acho que nao\n" + ex.getMessage() + "\n" + baos.toString());
-                arvorePanel.setRaiz(null);
-                arvoreTextoArea.setText("");
-            } finally {
+                arvoreTextoPanel.setArvoreText("");
+                tokensPanel.setTokensText("");
+            } 
+            finally 
+            {
                 System.setOut(oldOut);
                 System.setErr(oldOut);
             }
-        } catch (Exception ex) {
-            output.setText("Acho que nao\n" + ex.getMessage());
+        } 
+        catch (Exception ex) 
+        {
+            outputPanel.setOutputText("Acho que nao\n" + ex.getMessage());
             arvorePanel.setRaiz(null);
-            arvoreTextoArea.setText("");
+            arvoreTextoPanel.setArvoreText("");
         }
         alternarVisualizacaoArvore();
     }
@@ -196,60 +227,79 @@ public class CompiladorGUI extends JFrame {
 
 
     // Alterna entre visualização gráfica e textual da árvore no painel lateral
-    private void alternarVisualizacaoArvore() {
+    private void alternarVisualizacaoArvore() 
+    {
+        // Alterna entre visualização gráfica, textual e tokens no painel lateral
         CardLayout cl = (CardLayout)((JPanel)((JPanel)seletorArvore.getParent()).getComponent(1)).getLayout();
         String modo = (String) seletorArvore.getSelectedItem();
         cl.show(((JPanel)((JPanel)seletorArvore.getParent()).getComponent(1)), modo);
     }
 
     // Cria um novo arquivo
-    private void novoArquivo() {
+    private void novoArquivo() 
+    {
+        // Cria um novo arquivo e limpa o editor
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Criar novo arquivo");
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         int res = chooser.showSaveDialog(this);
-        if (res == JFileChooser.APPROVE_OPTION) {
+        if (res == JFileChooser.APPROVE_OPTION) 
+        {
             arquivoAtual = chooser.getSelectedFile();
-            editor.setText("");
+            editorPanel.setText("");
             setTitle("Compilador - " + arquivoAtual.getName());
             salvarArquivo();
         }
     }
 
     // Abre um arquivo existente
-    private void abrirArquivo() {
+    private void abrirArquivo() 
+    {
+        // Abre um arquivo existente e carrega no editor
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Abrir arquivo");
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         int res = chooser.showOpenDialog(this);
-        if (res == JFileChooser.APPROVE_OPTION) {
+        if (res == JFileChooser.APPROVE_OPTION) 
+        {
             arquivoAtual = chooser.getSelectedFile();
-            try (BufferedReader br = new BufferedReader(new FileReader(arquivoAtual))) {
+            try (BufferedReader br = new BufferedReader(new FileReader(arquivoAtual))) 
+            {
                 StringBuilder sb = new StringBuilder();
                 String linha;
-                while ((linha = br.readLine()) != null) {
+                while ((linha = br.readLine()) != null) 
+                {
                     sb.append(linha).append("\n");
                 }
-                editor.setText(sb.toString());
+                editorPanel.setText(sb.toString());
                 setTitle("Compilador - " + arquivoAtual.getName());
-            } catch (IOException ex) {
+            } 
+            catch (IOException ex) 
+            {
                 JOptionPane.showMessageDialog(this, "Erro ao abrir arquivo: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
     // Salva o arquivo atual
-    private void salvarArquivo() {
+    private void salvarArquivo() 
+    {
+        // Salva o conteúdo atual do editor no arquivo aberto
         if (arquivoAtual == null) return;
-        try (FileWriter fw = new FileWriter(arquivoAtual)) {
-            fw.write(editor.getText());
-        } catch (IOException ex) {
+        try (FileWriter fw = new FileWriter(arquivoAtual)) 
+        {
+            fw.write(editorPanel.getText());
+        } 
+        catch (IOException ex) 
+        {
             JOptionPane.showMessageDialog(this, "Erro ao salvar arquivo: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     // Ponto de entrada da aplicação
-    public static void main(String[] args) {
+    public static void main(String[] args) 
+    {
+        // Ponto de entrada da aplicação: exibe a janela principal
         SwingUtilities.invokeLater(() -> new CompiladorGUI().setVisible(true));
     }
 }

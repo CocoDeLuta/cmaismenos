@@ -36,6 +36,11 @@ public class CMaisMenos
           break;
         }*/
       }
+      catch (recovery.ParseEOFException e)
+      {
+        System.out.println("ParseEOFException: " + e.getMessage());
+        break;
+      }
       catch (Exception e)
       {
         System.out.println(" ");
